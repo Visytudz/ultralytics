@@ -5,23 +5,23 @@ projects with multilingual content. It streamlines the workflow for generating l
 and updating HTML links to ensure they are correctly formatted.
 
 Key Features:
-- Automated building of MkDocs documentation: The script compiles both the main documentation and
-  any localized versions specified in separate MkDocs configuration files.
-- Post-processing of generated HTML files: After the documentation is built, the script updates all
-  HTML files to remove the '.md' extension from internal links. This ensures that links in the built
-  HTML documentation correctly point to other HTML pages rather than Markdown files, which is crucial
-  for proper navigation within the web-based documentation.
+    - Automated building of MkDocs documentation: The script compiles both the main documentation and
+      any localized versions specified in separate MkDocs configuration files.
+    - Post-processing of generated HTML files: After the documentation is built, the script updates all
+      HTML files to remove the '.md' extension from internal links. This ensures that links in the built
+      HTML documentation correctly point to other HTML pages rather than Markdown files, which is crucial
+      for proper navigation within the web-based documentation.
 
 Usage:
-- Run the script from the root directory of your MkDocs project.
-- Ensure that MkDocs is installed and that all MkDocs configuration files (main and localized versions)
-  are present in the project directory.
-- The script first builds the documentation using MkDocs, then scans the generated HTML files in the 'site'
-  directory to update the internal links.
-- It's ideal for projects where the documentation is written in Markdown and needs to be served as a static website.
+    - Run the script from the root directory of your MkDocs project.
+    - Ensure that MkDocs is installed and that all MkDocs configuration files (main and localized versions)
+      are present in the project directory.
+    - The script first builds the documentation using MkDocs, then scans the generated HTML files in the 'site'
+      directory to update the internal links.
+    - It's ideal for projects where the documentation is written in Markdown and needs to be served as a static website.
 
 Note:
-- This script is built to be run in an environment where Python and MkDocs are installed and properly configured.
+    - This script is built to be run in an environment where Python and MkDocs are installed and properly configured.
 """
 
 import os
@@ -127,6 +127,21 @@ def update_markdown_files(md_filepath: Path):
         if not content.strip().startswith("---\n"):
             header = "---\ncomments: true\ndescription: TODO ADD DESCRIPTION\nkeywords: TODO ADD KEYWORDS\n---\n\n"
             content = header + content
+
+        # Ensure MkDocs admonitions "=== " lines are preceded and followed by empty newlines
+        lines = content.split("\n")
+        new_lines = []
+        for i, line in enumerate(lines):
+            stripped_line = line.strip()
+            if stripped_line.startswith("=== "):
+                if i > 0 and new_lines[-1] != "":
+                    new_lines.append("")
+                new_lines.append(line)
+                if i < len(lines) - 1 and lines[i + 1].strip() != "":
+                    new_lines.append("")
+            else:
+                new_lines.append(line)
+        content = "\n".join(new_lines)
 
         # Add EOF newline if missing
         if not content.endswith("\n"):
